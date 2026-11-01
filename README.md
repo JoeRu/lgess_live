@@ -56,7 +56,40 @@ You need **root SSH access to the ESS**. How to obtain it is out of scope here.
 Errors return HTTP `503` with `{"error": "..."}` (e.g. while the LG processes restart),
 unknown paths `404`. `/`, `/live` and `/api/live` all return the values.
 
-## Installation
+## Home Assistant (HACS) — recommended
+
+The repository is also a Home Assistant integration. It installs the service on the ESS
+for you and creates all sensors, including kWh counters for the energy dashboard — no
+command line, no YAML.
+
+1. HACS → ⋮ → *Custom repositories* → add `https://github.com/JoeRu/lgess_live`,
+   category **Integration**. Install **LG ESS Live** and restart Home Assistant.
+2. *Settings → Devices & services → Add integration → LG ESS Live*.
+3. Enter the ESS address. If the service is not on the ESS yet, tick
+   **Install service on the ESS now** and give the SSH user (usually `root`) and password
+   (leave empty if there is none). The integration copies the service over SSH, starts it
+   and checks that it answers.
+
+You get one device *LG ESS* with:
+
+| Entity | |
+|---|---|
+| PV power, Grid power (+ import / − export), Grid import, Grid export, Consumption, Grid frequency | W / Hz, enabled |
+| PV1/PV2 power, voltage, current, DC link voltage, battery values | disabled by default |
+| **Grid import energy, Grid export energy, PV energy, Consumption energy** | kWh, `total_increasing`, ready for the energy dashboard |
+| Button **Install or update service** | re-installs the bundled service version over SSH (after an integration update or an ESS firmware update) |
+
+The kWh counters integrate the power values (left Riemann sum) and survive restarts; gaps
+longer than 60 s (outage) are not integrated. Polling interval: options, default 5 s.
+
+For the energy dashboard use *Grid import energy* (grid consumption), *Grid export energy*
+(return to grid) and *PV energy* (solar production).
+
+**SSH:** the host key of the ESS is accepted on first use, and the SSH password is stored in
+the config entry like other Home Assistant credentials. Use the button only in a network
+you trust.
+
+## Installation without Home Assistant
 
 From any Linux/macOS machine with SSH access to the ESS:
 
@@ -66,9 +99,10 @@ cd lgess_live
 ./install.sh <ess-ip>
 ```
 
-`install.sh` copies the service to `/usr/local/lgess_live/`, installs the SysV init script
-`/etc/init.d/lgess_live`, links it to `/etc/rc5.d/S95lgess_live` (autostart), (re)starts it
-and prints one reading. Re-run it to update.
+`install.sh` copies the service (`custom_components/lgess_live/ess/`) to
+`/usr/local/lgess_live/`, installs the SysV init script `/etc/init.d/lgess_live`, links it to
+`/etc/rc5.d/S95lgess_live` (autostart), (re)starts it and prints one reading. Re-run it to
+update.
 
 ```sh
 ssh root@<ess-ip> /etc/init.d/lgess_live restart   # restart
@@ -78,44 +112,19 @@ curl http://<ess-ip>:8085/api/live                 # test
 
 Quick test on the device without installing: `python -S lgess_live.py --once`.
 
-## Home Assistant
+## Home Assistant without the integration (YAML)
 
-Use the [REST integration](https://www.home-assistant.io/integrations/rest/). The full
-example is in [`examples/homeassistant/lgess_live.yaml`](examples/homeassistant/lgess_live.yaml);
+If you prefer plain YAML, use the [REST integration](https://www.home-assistant.io/integrations/rest/).
+The full example is in [`examples/homeassistant/lgess_live.yaml`](examples/homeassistant/lgess_live.yaml);
 put it into a [package](https://www.home-assistant.io/docs/configuration/packages/)
 (`packages/lgess_live.yaml`) or under `rest:` in `configuration.yaml`, replace `<ess-ip>`,
-then restart Home Assistant (or *Developer tools → YAML → REST entities*).
+then restart Home Assistant.
 
-```yaml
-rest:
-  - resource: http://<ess-ip>:8085/api/live
-    scan_interval: 5
-    timeout: 4
-    sensor:
-      - name: "ESS PV power"
-        unique_id: lgess_live_pv_power
-        value_template: "{{ value_json.ac_power_w }}"
-        unit_of_measurement: W
-        device_class: power
-        state_class: measurement
-      # … grid power, import, export, consumption — see the example file
-```
-
-### Energy dashboard
-
-The energy dashboard needs **energy** (kWh), not power (W). Create one
-*Integral* helper per power sensor: *Settings → Devices & services → Helpers → Create
-helper → Integral sensor*, input = the power sensor, method **Left**, metric prefix
-**k** (kilo), time unit **hours**. Then use
-
-| Dashboard slot | Integral of |
-|---|---|
-| Grid consumption | `ESS grid import` |
-| Return to grid | `ESS grid export` |
-| Solar production | `ESS PV power` |
-
-Use `ac_power_w` for solar production if no battery is connected (it is the AC power the
-inverter actually feeds in); `pv_power_w` is the DC side before conversion losses.
+For the energy dashboard, create one *Integral* helper per power sensor: *Settings →
+Devices & services → Helpers → Create helper → Integral sensor*, method **Left**, metric
+prefix **k**, time unit **hours**, and use the integrals of *ESS grid import*, *ESS grid
+export* and *ESS PV power*. Use `ac_power_w` for solar production if no battery is
+connected; `pv_power_w` is the DC side before conversion losses.
 
 ## evcc
 
@@ -167,6 +176,7 @@ Details, all segments and how the offsets were derived:
 
 ## Changelog
 
+- **2026-11-01** — Home Assistant integration (HACS): config flow with SSH install, sensors, kWh counters, install/update button.
 - **2026-11-01** — one thread per connection (max. 16). Before, connections were served
   one after another, and a client slow to send its request stalled all others for up to
   5 s (~2–3 % of 5 s monitoring probes timed out).

@@ -1,0 +1,106 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "LG ESS",
+        "description": "Address of the LG ESS. Tick \"Install service\" to copy the lgess_live service to the ESS over SSH first (needs root SSH access; the stock user is root without password on many units).",
+        "data": {
+          "host": "Host",
+          "port": "Port",
+          "install_service": "Install service on the ESS now",
+          "ssh_user": "SSH user",
+          "ssh_password": "SSH password (empty if none)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "The service on the ESS does not answer. Install it (tick the box) or check host and port.",
+      "deploy_failed": "Installing over SSH failed. Check SSH access, user and password."
+    },
+    "abort": {
+      "already_configured": "This ESS is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "LG ESS options",
+        "data": {
+          "scan_interval": "Polling interval (seconds)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "pv_power": {
+        "name": "PV power"
+      },
+      "pv_power_dc": {
+        "name": "PV power DC"
+      },
+      "grid_power": {
+        "name": "Grid power"
+      },
+      "grid_import": {
+        "name": "Grid import"
+      },
+      "grid_export": {
+        "name": "Grid export"
+      },
+      "consumption": {
+        "name": "Consumption"
+      },
+      "grid_frequency": {
+        "name": "Grid frequency"
+      },
+      "pv1_power": {
+        "name": "PV1 power"
+      },
+      "pv1_voltage": {
+        "name": "PV1 voltage"
+      },
+      "pv1_current": {
+        "name": "PV1 current"
+      },
+      "pv2_power": {
+        "name": "PV2 power"
+      },
+      "pv2_voltage": {
+        "name": "PV2 voltage"
+      },
+      "pv2_current": {
+        "name": "PV2 current"
+      },
+      "dc_link_voltage": {
+        "name": "DC link voltage"
+      },
+      "battery_power": {
+        "name": "Battery power"
+      },
+      "battery_voltage": {
+        "name": "Battery voltage"
+      },
+      "battery_soc": {
+        "name": "Battery state of charge"
+      },
+      "grid_import_energy": {
+        "name": "Grid import energy"
+      },
+      "grid_export_energy": {
+        "name": "Grid export energy"
+      },
+      "pv_energy": {
+        "name": "PV energy"
+      },
+      "consumption_energy": {
+        "name": "Consumption energy"
+      }
+    },
+    "button": {
+      "install_service": {
+        "name": "Install or update service"
+      }
+    }
+  }
+}
