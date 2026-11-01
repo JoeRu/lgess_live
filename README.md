@@ -61,7 +61,7 @@ unknown paths `404`. `/`, `/live` and `/api/live` all return the values.
 From any Linux/macOS machine with SSH access to the ESS:
 
 ```sh
-git clone https://github.com/<you>/lgess_live.git
+git clone https://github.com/JoeRu/lgess_live.git
 cd lgess_live
 ./install.sh <ess-ip>
 ```
