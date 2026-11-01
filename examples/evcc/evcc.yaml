@@ -1,0 +1,19 @@
+# evcc meters fed by lgess_live. Replace <ess-ip>.
+meters:
+  - name: grid
+    type: custom
+    power:
+      source: http
+      uri: http://<ess-ip>:8085/api/live
+      jq: .grid_power_w          # + import / - export
+  - name: pv
+    type: custom
+    power:
+      source: http
+      uri: http://<ess-ip>:8085/api/live
+      jq: '[.ac_power_w, 0] | max'
+
+site:
+  meters:
+    grid: grid
+    pv: [pv]

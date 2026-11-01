@@ -1,0 +1,53 @@
+# lgess_live – live values (1 s) from an LG ESS, polled every 5 s.
+# Put this file into config/packages/ (homeassistant: packages: !include_dir_named packages)
+# or copy the rest: block into configuration.yaml. Replace <ess-ip>.
+#
+# grid: + import / - export. ac_power_w = AC power fed by the inverter (= PV
+# production while no battery is connected); pv_power_w = DC side (pv1 + pv2).
+rest:
+  - resource: http://<ess-ip>:8085/api/live
+    scan_interval: 5
+    timeout: 4
+    sensor:
+      - name: "ESS PV power"
+        unique_id: lgess_live_pv_power
+        value_template: "{{ value_json.ac_power_w }}"
+        unit_of_measurement: W
+        device_class: power
+        state_class: measurement
+      - name: "ESS PV power DC"
+        unique_id: lgess_live_pv_power_dc
+        value_template: "{{ value_json.pv_power_w }}"
+        unit_of_measurement: W
+        device_class: power
+        state_class: measurement
+      - name: "ESS grid power"
+        unique_id: lgess_live_grid_power
+        value_template: "{{ value_json.grid_power_w }}"
+        unit_of_measurement: W
+        device_class: power
+        state_class: measurement
+      - name: "ESS grid import"
+        unique_id: lgess_live_grid_import
+        value_template: "{{ value_json.grid_import_w }}"
+        unit_of_measurement: W
+        device_class: power
+        state_class: measurement
+      - name: "ESS grid export"
+        unique_id: lgess_live_grid_export
+        value_template: "{{ value_json.grid_export_w }}"
+        unit_of_measurement: W
+        device_class: power
+        state_class: measurement
+      - name: "ESS consumption"
+        unique_id: lgess_live_load_power
+        value_template: "{{ value_json.load_power_w }}"
+        unit_of_measurement: W
+        device_class: power
+        state_class: measurement
+      - name: "ESS grid frequency"
+        unique_id: lgess_live_meter_freq
+        value_template: "{{ value_json.meter_freq_hz }}"
+        unit_of_measurement: Hz
+        device_class: frequency
+        state_class: measurement

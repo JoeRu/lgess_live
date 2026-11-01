@@ -1,0 +1,20 @@
+#!/bin/sh
+# /etc/init.d/lgess_live - LG ESS Echtzeitwerte per HTTP (Port 8085)
+DAEMON=/usr/local/lgess_live/lgess_live.py
+PIDFILE=/var/run/lgess_live.pid
+PORT=8085
+
+case "$1" in
+  start)
+    start-stop-daemon -S -b -m -p $PIDFILE -x /usr/bin/python -- -S $DAEMON $PORT
+    ;;
+  stop)
+    start-stop-daemon -K -p $PIDFILE && rm -f $PIDFILE
+    ;;
+  restart)
+    $0 stop; sleep 1; $0 start
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart}"; exit 1
+    ;;
+esac
