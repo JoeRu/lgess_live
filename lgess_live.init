@@ -1,5 +1,5 @@
 #!/bin/sh
-# /etc/init.d/lgess_live - LG ESS Echtzeitwerte per HTTP (Port 8085)
+# /etc/init.d/lgess_live - LG ESS live values over HTTP (port 8085)
 DAEMON=/usr/local/lgess_live/lgess_live.py
 PIDFILE=/var/run/lgess_live.pid
 PORT=8085

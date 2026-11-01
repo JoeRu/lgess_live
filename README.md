@@ -157,7 +157,7 @@ attached directly, so the service reads it through `/proc/<pid>/mem` of a proces
 it mapped, twice per read, retrying if the two copies differ (a write was in progress).
 
 Details, all segments and how the offsets were derived:
-[`docs/reverse-engineering.de.md`](docs/reverse-engineering.de.md) (German).
+[`docs/reverse-engineering.md`](docs/reverse-engineering.md).
 
 ## Security
 
@@ -171,6 +171,10 @@ Details, all segments and how the offsets were derived:
   one after another, and a client slow to send its request stalled all others for up to
   5 s (~2–3 % of 5 s monitoring probes timed out).
 - **2026-10-19** — first version.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
 
 ## Disclaimer
 

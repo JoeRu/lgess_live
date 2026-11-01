@@ -1,20 +1,21 @@
 #!/usr/bin/python -S
 # -*- coding: utf-8 -*-
 """
-lgess_live - Echtzeitwerte des LG ESS (ED05K000E00) per HTTP/JSON.
+lgess_live - live values of an LG ESS (ED05K000E00) over HTTP/JSON.
 
-Liest read-only das SysV-Shared-Memory-Segment 1719 ("FromPCS", 743 Byte,
-gepackt), in das die LG-Manager-Prozesse sekuendlich die Wechselrichter- und
-Zaehlerwerte schreiben. Offsets stammen aus der Disassembly von
+Reads, read-only, the SysV shared-memory segment 1719 ("FromPCS", 743 bytes,
+packed) that the LG manager processes update every second with the inverter
+and grid-meter values. Offsets come from the disassembly of
 AlgMgrShm::GetLogPCSInformation() in /usr/bin/ALGMgr.
 
-Ohne ctypes (fehlt auf dem Geraet): das Segment wird ueber
-/proc/<pid>/maps + /proc/<pid>/mem eines Prozesses gelesen, der es eingeblendet hat.
+The device has no ctypes, so the segment is read through /proc/<pid>/maps and
+/proc/<pid>/mem of a process that has it mapped.
 
-Python 2.7 auf dem Geraet ist unvollstaendig (kein json, kein BaseHTTPServer),
-daher Mini-HTTP-Server auf socket-Basis und JSON von Hand.
+The device's Python 2.7 is incomplete (no json, no BaseHTTPServer, no
+SocketServer), hence a minimal socket-based HTTP server and hand-made JSON.
 
-Start:  python -S /usr/local/lgess_live/lgess_live.py [port]   (Default 8085)
+Start:  python -S /usr/local/lgess_live/lgess_live.py [port]   (default 8085)
+        python -S lgess_live.py --once                         (print one reading)
 """
 import os
 import socket
@@ -27,11 +28,11 @@ SHM_NAME = "/SYSV000006b7"   # key 1719
 SHM_SIZE = 743
 CACHE_SEC = 1.0
 
-# (name, offset, struct-format) - Offsets aus GetLogPCSInformation
+# (name, offset, struct format) - offsets from GetLogPCSInformation
 FIELDS = [
-    ("meter_power_w",  327, "f"),   # Netzzaehler, + Bezug / - Einspeisung
+    ("meter_power_w",  327, "f"),   # grid meter, + import / - export
     ("meter_freq_hz",  331, "f"),
-    ("ac_power_w",     149, "i"),   # Wechselrichter AC-Ausgang
+    ("ac_power_w",     149, "i"),   # inverter AC output
     ("ac_freq_hz",     195, "f"),
     ("batt_power_w",   141, "i"),
     ("batt_voltage_v", 125, "f"),
@@ -49,7 +50,7 @@ FIELDS = [
 
 
 def find_mapping():
-    """(pid, addr) eines Prozesses, der das Segment eingeblendet hat."""
+    """(pid, addr) of a process that has the segment mapped."""
     for pid in os.listdir("/proc"):
         if not pid.isdigit():
             continue
@@ -79,8 +80,8 @@ def read_raw():
                 b = f.read(SHM_SIZE)
             finally:
                 f.close()
-            # kein Zugriff auf den clipShMemLock-Semaphor ohne ctypes:
-            # zweimal lesen, bei Abweichung (Schreibvorgang) nochmal
+            # no access to the clipShMemLock semaphore without ctypes:
+            # read twice, and again while the reads differ (write in progress)
             for _ in range(5):
                 if a == b:
                     break
@@ -91,7 +92,7 @@ def read_raw():
                 f.close()
             return a
         except (IOError, OSError):
-            _map[0] = None   # Prozess neu gestartet -> neu suchen
+            _map[0] = None   # process restarted -> look it up again
     raise IOError("cannot read shm")
 
 
@@ -102,10 +103,10 @@ def decode(raw):
     pv = v["pv1_power_w"] + v["pv2_power_w"]
     grid = v["meter_power_w"]
     v["pv_power_w"] = pv
-    v["grid_power_w"] = grid                       # evcc: + Bezug, - Einspeisung
+    v["grid_power_w"] = grid                       # evcc: + import, - export
     v["grid_import_w"] = max(grid, 0.0)
     v["grid_export_w"] = max(-grid, 0.0)
-    v["load_power_w"] = v["ac_power_w"] + grid     # Hausverbrauch
+    v["load_power_w"] = v["ac_power_w"] + grid     # house consumption
     v["timestamp"] = int(time.time())
     return v
 
