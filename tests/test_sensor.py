@@ -1,8 +1,8 @@
 from datetime import timedelta
 from unittest.mock import AsyncMock, patch
 
-from pytest_homeassistant_custom_component.common import MockConfigEntry, async_fire_time_changed
 from homeassistant.util import dt as dt_util
+from pytest_homeassistant_custom_component.common import MockConfigEntry, async_fire_time_changed
 
 from custom_components.lgess_live.const import DOMAIN
 

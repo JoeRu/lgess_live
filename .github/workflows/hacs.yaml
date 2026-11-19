@@ -4,6 +4,8 @@ on:
   push:
     branches: ["**"]
   pull_request:
+  schedule:
+    - cron: "0 4 * * 1"
   workflow_dispatch:
 
 jobs:
@@ -17,3 +19,4 @@ jobs:
         uses: hacs/action@main
         with:
           category: integration
+          ignore: brands

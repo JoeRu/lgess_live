@@ -3,10 +3,21 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from homeassistant.components.sensor import (RestoreSensor, SensorDeviceClass, SensorEntity,
-                                             SensorEntityDescription, SensorStateClass)
-from homeassistant.const import (PERCENTAGE, UnitOfElectricCurrent, UnitOfElectricPotential,
-                                 UnitOfEnergy, UnitOfFrequency, UnitOfPower)
+from homeassistant.components.sensor import (
+    RestoreSensor,
+    SensorDeviceClass,
+    SensorEntity,
+    SensorEntityDescription,
+    SensorStateClass,
+)
+from homeassistant.const import (
+    PERCENTAGE,
+    UnitOfElectricCurrent,
+    UnitOfElectricPotential,
+    UnitOfEnergy,
+    UnitOfFrequency,
+    UnitOfPower,
+)
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import dt as dt_util
