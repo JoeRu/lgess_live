@@ -10,6 +10,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import asyncssh
+from homeassistant.core import HomeAssistant
 
 ESS_DIR = Path(__file__).parent / "ess"
 REMOTE_DIR = "/usr/local/lgess_live"
@@ -25,9 +26,12 @@ def _bundled() -> tuple[bytes, bytes]:
     return (ESS_DIR / "lgess_live.py").read_bytes(), (ESS_DIR / "lgess_live.init").read_bytes()
 
 
-async def deploy(host: str, username: str, password: str | None = None, port: int = 22) -> str:
+async def deploy(
+    hass: HomeAssistant, host: str, username: str, password: str | None = None, port: int = 22
+) -> str:
     """Install/update the service; returns the output of the restart."""
-    service, init = _bundled()
+    # File I/O must not run in the event loop.
+    service, init = await hass.async_add_executor_job(_bundled)
     try:
         # The ESS's host key is not known in advance and the device sits in the
         # local network; the key is accepted on first use (as `ssh` would ask).

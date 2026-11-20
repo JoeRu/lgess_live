@@ -35,7 +35,7 @@ class LgEssConfigFlow(ConfigFlow, domain=DOMAIN):
             self._abort_if_unique_id_configured()
             if user_input.get(CONF_INSTALL):
                 try:
-                    await deploy(host, user_input[CONF_SSH_USER],
+                    await deploy(self.hass, host, user_input[CONF_SSH_USER],
                                  user_input.get(CONF_SSH_PASSWORD))
                 except DeployError:
                     errors["base"] = "deploy_failed"

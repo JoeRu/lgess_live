@@ -29,7 +29,7 @@ class LgEssDeployButton(LgEssEntity, ButtonEntity):
     async def async_press(self) -> None:
         data = self.coordinator.config_entry.data
         try:
-            await deploy(data[CONF_HOST], data.get(CONF_SSH_USER, DEFAULT_SSH_USER),
+            await deploy(self.hass, data[CONF_HOST], data.get(CONF_SSH_USER, DEFAULT_SSH_USER),
                          data.get(CONF_SSH_PASSWORD) or None)
         except DeployError as err:
             raise HomeAssistantError(f"Installing the service on the ESS failed: {err}") from err

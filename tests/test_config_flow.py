@@ -38,7 +38,7 @@ async def test_install_then_connect(hass):
          patch("custom_components.lgess_live.async_setup_entry", AsyncMock(return_value=True)):
         r = await hass.config_entries.flow.async_configure(r["flow_id"], {**USER, "install_service": True})
     assert r["type"] is FlowResultType.CREATE_ENTRY
-    dep.assert_awaited_once_with("10.0.0.17", "root", "")
+    dep.assert_awaited_once_with(hass, "10.0.0.17", "root", "")
 
 
 async def test_install_failure(hass):
